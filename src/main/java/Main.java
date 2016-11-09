@@ -1,4 +1,4 @@
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -8,12 +8,28 @@ import java.util.concurrent.Executors;
  */
 public class Main {
 
+    private static String influxUrl;
+    private static String kafkaUrl;
+    private static List<String> topicNames = new ArrayList<>();
 
-    private static final String influxUrl = "http://192.168.99.100:8086";
-    private static final String kafkaUrl = "192.168.99.100:2181";
-    private static List<String> topicNames = Arrays.asList("Production_SmartRouting_ThisIsMyPrefix_Metrics_JVM", "Production_SmartRouting_ThisIsMyPrefix_Metrics_Counters", "Production_SmartRouting_ThisIsMyPrefix_Metrics_Gauges");
+    public static void main(String[] args) throws Exception {
+        System.out.println("Starting Kafka to Influx");
+        if (args.length < 3) {
+            throw new Exception("Expecting at least 3 args, kafkaUrl, influxUrl and a topic");
+        }
 
-    public static void main(String[] args) {
+        kafkaUrl = args[0];
+        System.out.println("kafkaUrl: " + kafkaUrl);
+        influxUrl = args[1];
+        System.out.println("influxUrl: " + influxUrl);
+
+
+        for (int i = 2; i < args.length; i++) {
+            topicNames.add(args[i]);
+            System.out.println("topicName: " + args[i]);
+
+        }
+
         handleMetrics();
     }
 
