@@ -37,13 +37,20 @@ public class Main {
         InfluxClient influxClient = new InfluxClient(influxUrl);
         KafkaConsumer kafkaConsumer = new KafkaConsumer(kafkaUrl);
         ExecutorService pool = Executors.newFixedThreadPool(topicNames.size());
+        ExecutorService influxPool = Executors.newFixedThreadPool(25);
+
+        final int[] messageId = {0};
 
         for (int i = 0; i < topicNames.size(); i++) {
             final int finalI = i;
             pool.submit(() -> kafkaConsumer.consumeMessages(topicNames.get(finalI), o ->
             {
-                System.out.println(o);
-                influxClient.publish(o);
+                if (messageId[0] % 1000 == 0) {
+                    System.out.println(System.currentTimeMillis() + " current index: " + messageId[0]);
+                    System.out.println(o);
+                }
+                messageId[0]++;
+                influxPool.submit(() -> influxClient.publish(o));
             }));
         }
     }
